@@ -22,8 +22,8 @@ char getch() {
     return ch;
 }
 
-#define WIDTH 20
-#define HEIGHT 10
+#define WIDTH 40
+#define HEIGHT 20
 
 class World;
 
@@ -179,19 +179,7 @@ class Wolf : public Animal {
                 void action() override {
                     int chance = rand() % 4;
                     if (chance == 0) {
-                        int dir = rand() % 4;
-                        int nx = x, ny = y;
-                        if (dir == 0 && y > 0) ny--;
-                        else if (dir == 1 && y < HEIGHT - 1) ny++;
-                        else if (dir == 2 && x > 0) nx--;
-                        else if (dir == 3 && x < WIDTH - 1) nx++;
-                    
-                        if (world->grid[ny][nx]) collision(world->grid[ny][nx]);
-                        else {
-                            world->grid[y][x] = nullptr;
-                            x = nx; y = ny;
-                            world->grid[y][x] = this;
-                        }
+                        Animal::action(); // Move with 25% chance
                     }
                     age++;
                 }
@@ -209,6 +197,41 @@ class Wolf : public Animal {
                     }
                 }
             };
+
+            class Antelope : public Animal {
+                public:
+                    Antelope(int x, int y, World* w) : Animal(4, 4, x, y, w) {} // Example stats: strength=3, initiative=2
+                    char draw() override { return 'A'; } // Representation for Sheep
+                    void action() override {
+                        int directions[4][2] = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}}; // UP, DOWN, LEFT, RIGHT
+                        std::random_shuffle(std::begin(directions), std::end(directions)); // Randomize movement order
+
+                        for (auto& dir : directions) {
+                            int nx = x + dir[0];
+                            int ny = y + dir[1];
+
+                            if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT) {
+                                Organism* target = world->grid[ny][nx];
+                                if (!target) { // Move if cell is empty
+                                    world->grid[y][x] = nullptr;
+                                    x = nx; y = ny;
+                                    world->grid[y][x] = this;
+                                    break; // Stop after moving
+                                } else if (target->strength <= strength) { // Handle collision if weaker organism
+                                    collision(target);
+                                    if (alive) {
+                                        world->grid[y][x] = nullptr;
+                                        x = nx; y = ny;
+                                        world->grid[y][x] = this;
+                                    }
+                                    break; // Stop after moving
+                                }
+                            }
+                        }
+                        age++;
+                    }
+                };
+            
 
 
 void Human::action() {
@@ -266,6 +289,8 @@ int main() {
     //for (int i = 0; i < 5; ++i) world.addOrganism(new Sheep(rand() % WIDTH, rand() % HEIGHT, &world));
     for (int i = 0; i < 5; ++i) world.addOrganism(new Wolf(rand() % WIDTH, rand() % HEIGHT, &world));
     for (int i = 0; i < 5; ++i) world.addOrganism(new Fox(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 5; ++i) world.addOrganism(new Turtle(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 5; ++i) world.addOrganism(new Antelope(rand() % WIDTH, rand() % HEIGHT, &world));
 
     while (true) {
         world.drawWorld();
