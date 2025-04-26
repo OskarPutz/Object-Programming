@@ -1,0 +1,3 @@
+/Users/oskarputz/GitHub/Object-Programming/lab1/cmake-build-debug/CMakeFiles/lab1.dir
+/Users/oskarputz/GitHub/Object-Programming/lab1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/oskarputz/GitHub/Object-Programming/lab1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
