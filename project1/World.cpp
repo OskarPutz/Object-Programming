@@ -1,4 +1,3 @@
-// Simplified virtual world simulator framework in C++
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -9,7 +8,6 @@
 
 using namespace std;
 
-// Cross-platform alternative for _getch()
 char getch() {
     struct termios oldt, newt;
     char ch;
@@ -22,8 +20,8 @@ char getch() {
     return ch;
 }
 
-#define WIDTH 20
-#define HEIGHT 10
+#define WIDTH 40
+#define HEIGHT 20
 
 class World;
 
@@ -31,35 +29,30 @@ class Organism {
 public:
     int strength, initiative, age;
     int x, y;
-    int prev_x;
-    int prev_y;
+
     World* world;
     bool alive = true;
 
     Organism(int str, int init, int x, int y, World* w) : strength(str), initiative(init), x(x), y(y), world(w), age(0) {}
     virtual ~Organism() = default;
-
     virtual void action() = 0;
     virtual void collision(Organism* other) = 0;
     virtual char draw() = 0;
     bool isAlive() const { return alive; }
 };
 
-// Abstract base class for all animals
 class Animal : public Organism {
     bool move = true;
 public:
     Animal(int str, int init, int x, int y, World* w) : Organism(str, init, x, y, w) {}
     virtual ~Animal() = default;
-
+    virtual Animal* clone(int x, int y) const = 0;
     void action() override;
     void collision(Organism* other) override;
 
-    // Move back to previous position
-    char draw() override { return 'A'; } // Default representation for Animal
+    char draw() override { return 'A'; } 
 };
 
-// Abstract base class for all plants
 class Plant : public Organism {
 public:
     Plant(int str, int x, int y, World* w) : Organism(str, 0, x, y, w) {}
@@ -67,7 +60,7 @@ public:
 
     void action() override {}
     void collision(Organism* other) override { alive = false; }
-    char draw() override { return 'P'; } // Default representation for Plant
+    char draw() override { return 'P'; }
 };
 
 class Human : public Animal {
@@ -77,7 +70,9 @@ public:
     int abilityCooldown = 0;
     int abilityDuration = 0;
     Human(int x, int y, World* w) : Animal(5, 4, x, y, w) {}
-
+    Animal* clone(int x, int y) const {
+        return new Human(x, y, world);
+    }
     void setDirection(int _dx, int _dy) { dx = _dx; dy = _dy; }
     void activateAbility();
     void action() override;
@@ -89,7 +84,8 @@ class World {
         std::vector<Organism*> organisms;
         std::vector<Organism*> newOrganisms;
         Organism* grid[HEIGHT][WIDTH] = {nullptr};
-        std::string lastCollisionMessage = "No collisions yet."; // Store the last collision message
+        std::string lastCollisionMessage = "No collisions yet."; 
+        Human* human = nullptr; 
     
         void addOrganism(Organism* org) {
             organisms.push_back(org);
@@ -97,7 +93,7 @@ class World {
         }
         
         void queueOrganism(Organism* org) {
-            newOrganisms.push_back(org); // Queue new organisms for addition
+            newOrganisms.push_back(org); 
         }
         void makeTurn();
         void drawWorld();
@@ -113,7 +109,6 @@ void Animal::action() {
 
     if (world->grid[ny][nx]) collision(world->grid[ny][nx]);
     if (alive && move){
-        prev_x = x; prev_y = y; 
         world->grid[y][x] = nullptr;
         x = nx; y = ny;
         world->grid[y][x] = this;
@@ -124,8 +119,26 @@ void Animal::action() {
 void Animal::collision(Organism* other) {
     if (typeid(*other) == typeid(*this)) {
         move = false;
+        int dirs[8][2] = { {0,1}, {1,0}, {0,-1}, {-1,0}, {1,1}, {1,-1}, {-1,1}, {-1,-1} };
+        std::random_shuffle(std::begin(dirs), std::end(dirs));
+        for (auto& dir : dirs) {
+            int nx = x + dir[0];
+            int ny = y + dir[1];
+            if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
+                Animal* thisAnimal = dynamic_cast<Animal*>(this);
+                if (thisAnimal) {
+                    Animal* child = thisAnimal->clone(nx, ny);
+                    if (child) {
+                        world->queueOrganism(child);
+                        world->lastCollisionMessage = draw() + std::string(" reproduced at (") + std::to_string(nx) + ", " + std::to_string(ny) + ")";
+                    }
+                }
+                break;
+            }
+        }
         return;
     }
+    
     if(other->draw() == 'h'){
         world->lastCollisionMessage = draw() + std::string(" was killed by Hogweed at (") +
                                       std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
@@ -136,26 +149,25 @@ void Animal::collision(Organism* other) {
     if (other->draw() == 'A'){
         int escapeChance = rand() % 2;
         if (escapeChance == 0) {
-            int escape = rand() % 4;
-            int nx = other->x, ny = other->y;
-            if (escape == 0 && other->y > 0) ny--;
-            else if (escape == 1 && other->y < HEIGHT - 1) ny++;
-            else if (escape == 2 && other->x > 0) nx--;
-            else if (escape == 3 && other->x < WIDTH - 1) nx++;
-            if (world->grid[ny][nx] == nullptr){
-                other->x = nx;
-                other->y = ny;
-                world->grid[other->y][other->x] = other;
-                world->lastCollisionMessage = other->draw() + std::string(" escaped from ") + draw() + std::string("at (") +
-                std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
+            int dirs[4][2] = { {0,1}, {1,0}, {0,-1}, {-1,0} };
+            std::random_shuffle(std::begin(dirs), std::end(dirs));
+            for (auto& dir : dirs) {
+                int nx = other->x + dir[0];
+                int ny = other->y + dir[1];
+                if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
+                    world->grid[ny][nx] = other;
+                    world->lastCollisionMessage = other->draw() + std::string(" escaped from ") + draw() + std::string("at (") +
+                    std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
+                    break;
+                }
             }
-            return;
+            return; 
         }
     }
     if (other->draw() == 'T'){
         if (strength < 5) {
-            world->lastCollisionMessage = draw() + std::string(" was deflected by Turtle at (") +
-                                          std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
+            move = false;
+            world->lastCollisionMessage = draw() + std::string(" was deflected by T at (") + std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
             return;
         }
     }
@@ -169,36 +181,45 @@ void Animal::collision(Organism* other) {
         world->lastCollisionMessage = other->draw() + std::string(" killed ") + draw() + 
                                       " at (" + std::to_string(x) + ", " + std::to_string(y) + ")";
         alive = false;
-        world->grid[y][x] = nullptr; // Remove this organism from the grid
+        world->grid[y][x] = nullptr; 
     } else {
         world->lastCollisionMessage = draw() + std::string(" killed ") + other->draw() + 
                                       " at (" + std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
         other->alive = false;
-        world->grid[other->y][other->x] = nullptr; // Remove the other organism from the grid
+        world->grid[other->y][other->x] = nullptr; 
     }
 };
 
 class Sheep : public Animal {
     public:
-        Sheep(int x, int y, World* w) : Animal(4, 4, x, y, w) {} // Example stats: strength=3, initiative=2
-        char draw() override { return 'S'; } // Representation for Sheep
+        Sheep(int x, int y, World* w) : Animal(4, 4, x, y, w) {}
+        char draw() override { return 'S'; } 
+        Animal* clone(int x, int y) const override{
+            return new Sheep(x, y, world);
+        }
     };
 
 class Wolf : public Animal {
     public:
-        Wolf(int x, int y, World* w) : Animal(9, 5, x, y, w) {} // Example stats: strength=3, initiative=2
-        char draw() override { return 'W'; } // Representation for Wolf
+        Wolf(int x, int y, World* w) : Animal(9, 5, x, y, w) {}
+        char draw() override { return 'W'; } 
+        Animal* clone(int x, int y) const override{
+            return new Wolf(x, y, world);
+        }
     };
 
 class Fox : public Animal {
     public:
-        Fox(int x, int y, World* w) : Animal(3, 7, x, y, w) {} // Example stats: strength=7, initiative=7
+        Fox(int x, int y, World* w) : Animal(3, 7, x, y, w) {}
         
-        char draw() override { return 'F'; } // Representation for Fox
+        char draw() override { return 'F'; } 
+        Animal* clone(int x, int y) const override{
+            return new Fox(x, y, world);
+        }
         
         void action() override {
-            int directions[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // UP, DOWN, LEFT, RIGHT
-            std::random_shuffle(std::begin(directions), std::end(directions)); // Randomize movement order
+            int directions[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; 
+            std::random_shuffle(std::begin(directions), std::end(directions));
         
             for (auto& dir : directions) {
                 int nx = x + dir[0];
@@ -206,14 +227,14 @@ class Fox : public Animal {
         
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT) {
                     Organism* target = world->grid[ny][nx];
-                    if (!target || target->strength <= strength) { // Move if cell is empty or weaker organism
-                        if (target) collision(target); // Handle collision if necessary
+                    if (!target || target->strength <= strength) { 
+                        if (target) collision(target); 
                         if (alive) {
                             world->grid[y][x] = nullptr;
                             x = nx; y = ny;
                             world->grid[y][x] = this;
                         }
-                        break; // Stop after moving
+                        break;
                     }
                 }
             }
@@ -223,12 +244,15 @@ class Fox : public Animal {
 
 class Turtle : public Animal {
     public:
-        Turtle(int x, int y, World* w) : Animal(2, 1, x, y, w) {} // Example stats: strength=3, initiative=2
+        Turtle(int x, int y, World* w) : Animal(2, 1, x, y, w) {}
         char draw() override { return 'T'; } 
+        Animal* clone(int x, int y) const override{
+            return new Turtle(x, y, world);
+        }
         void action() override {
             int chance = rand() % 4;
             if (chance == 0) {
-                Animal::action(); // Move with 25% chance
+                Animal::action(); 
             }
             age++;
         }
@@ -236,11 +260,14 @@ class Turtle : public Animal {
 
 class Antelope : public Animal {
     public:
-        Antelope(int x, int y, World* w) : Animal(4, 4, x, y, w) {} // Example stats: strength=3, initiative=2
-        char draw() override { return 'A'; } // Representation for Sheep
+        Antelope(int x, int y, World* w) : Animal(4, 4, x, y, w) {} 
+        char draw() override { return 'A'; } 
+        Animal* clone(int x, int y) const override{
+            return new Antelope(x, y, world);
+        }
         void action() override {
-            int directions[4][2] = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}}; // UP, DOWN, LEFT, RIGHT
-            std::random_shuffle(std::begin(directions), std::end(directions)); // Randomize movement order
+            int directions[4][2] = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}}; 
+            std::random_shuffle(std::begin(directions), std::end(directions));
 
             for (auto& dir : directions) {
                 int nx = x + dir[0];
@@ -252,7 +279,7 @@ class Antelope : public Animal {
                             x = nx; y = ny;
                             world->grid[y][x] = this;
                                     }
-                            break; // Stop after moving
+                            break; 
                     }
                 }
         age++;
@@ -262,14 +289,13 @@ class Antelope : public Animal {
 
 class Grass : public Plant {
     public:
-        Grass(int x, int y, World* w) : Plant(0, x, y, w) {} // Grass has strength 0
+        Grass(int x, int y, World* w) : Plant(0, x, y, w) {} 
         
-        char draw() override { return 'G'; } // Representation for Grass
+        char draw() override { return 'G'; }
         void action() override {
-            // Grass does not move, but can reproduce
-            if (rand() % 10 == 0) { // 20% chance to reproduce
-                int nx = x + (rand() % 3 - 1); // Random x offset (-1, 0, 1)
-                int ny = y + (rand() % 3 - 1); // Random y offset (-1, 0, 1)
+            if (rand() % 20 == 0) { 
+                int nx = x + (rand() % 3 - 1); 
+                int ny = y + (rand() % 3 - 1);
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
                     world->queueOrganism(new Grass(nx, ny, world));
                 }
@@ -279,15 +305,14 @@ class Grass : public Plant {
 
 class SowThistle : public Plant {
     public:
-        SowThistle(int x, int y, World* w) : Plant(0, x, y, w) {} // Grass has strength 0
+        SowThistle(int x, int y, World* w) : Plant(0, x, y, w) {} 
         
-        char draw() override { return 's'; } // Representation for Grass
+        char draw() override { return 's'; } 
         void action() override {
-            // Grass does not move, but can reproduce
-            for (int i = 0; i < 3; ++i) { // 3 attempts to reproduce
-                if (rand() % 10 == 0) { // 20% chance to reproduce
-                    int nx = x + (rand() % 3 - 1); // Random x offset (-1, 0, 1)
-                    int ny = y + (rand() % 3 - 1); // Random y offset (-1, 0, 1)
+            for (int i = 0; i < 3; ++i) { 
+                if (rand() % 20 == 0) { 
+                    int nx = x + (rand() % 3 - 1);
+                    int ny = y + (rand() % 3 - 1);
                     if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
                         world->queueOrganism(new Grass(nx, ny, world));
                     }
@@ -298,13 +323,12 @@ class SowThistle : public Plant {
     
 class Guarana : public Plant {
     public:
-        Guarana(int x, int y, World* w) : Plant(0, x, y, w) {} // Grass has strength 0
-        char draw() override { return 'g'; } // Representation for Grass
+        Guarana(int x, int y, World* w) : Plant(0, x, y, w) {} 
+        char draw() override { return 'g'; }
         void action() override {
-            // Grass does not move, but can reproduce
-            if (rand() % 5 == 0) { // 20% chance to reproduce
-                int nx = x + (rand() % 3 - 1); // Random x offset (-1, 0, 1)
-                int ny = y + (rand() % 3 - 1); // Random y offset (-1, 0, 1)
+            if (rand() % 5 == 0) { 
+                int nx = x + (rand() % 3 - 1); 
+                int ny = y + (rand() % 3 - 1); 
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
                     world->queueOrganism(new Guarana(nx, ny, world));
                 }
@@ -314,14 +338,13 @@ class Guarana : public Plant {
 
 class Belladonna : public Plant {
     public:
-        Belladonna(int x, int y, World* w) : Plant(99, x, y, w) {} // Grass has strength 0
+        Belladonna(int x, int y, World* w) : Plant(99, x, y, w) {} 
                     
-        char draw() override { return 'b'; } // Representation for Grass
+        char draw() override { return 'b'; } 
         void action() override {
-            // Grass does not move, but can reproduce
-            if (rand() % 20 == 0) { // 5% chance to reproduce
-                int nx = x + (rand() % 3 - 1); // Random x offset (-1, 0, 1)
-                int ny = y + (rand() % 3 - 1); // Random y offset (-1, 0, 1)
+            if (rand() % 20 == 0) { 
+                int nx = x + (rand() % 3 - 1); 
+                int ny = y + (rand() % 3 - 1); 
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
                     world->queueOrganism(new Belladonna(nx, ny, world));
                 }
@@ -356,8 +379,7 @@ void Human::action() {
     int nx = x + dx, ny = y + dy;
     dx = dy = 0;
     if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT) {
-        prev_x = x; prev_y = y; 
-        if (world->grid[ny][nx]) collision(world->grid[ny][nx]);
+        if (world->grid[ny][nx] && (nx != x || ny != y)) collision(world->grid[ny][nx]);
         if (alive) {
             world->grid[y][x] = nullptr;
             x = nx; y = ny;
@@ -375,8 +397,8 @@ void Human::action() {
 
 void Human::activateAbility() {
     if (abilityCooldown == 0) {
-        abilityDuration = 6; // Activate ability for 5 turns
-        abilityCooldown = 11; // Set cooldown for 10 turns
+        abilityDuration = 6; 
+        abilityCooldown = 11; 
         world->lastCollisionMessage = "Ability activated!";
         this->strength = 11;
     } 
@@ -401,7 +423,13 @@ void World::makeTurn() {
 
 void World::drawWorld() {
     system("clear");
-    std::cout << "Oskar Putz 203475\n\n";
+    std::cout << "Oskar Putz ID: 203475 \n";
+    if (human->abilityDuration > 0){
+        std::cout << "Ability status: ON\n";
+    } else {
+    std::cout << "Ability status: OFF\n";
+    }
+    std::cout << "Current strength: " << human->strength << "\n";
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (grid[y][x]) std::cout << grid[y][x]->draw();
@@ -416,26 +444,29 @@ void World::drawWorld() {
 int main() {
     srand((unsigned)time(0));
     World world;
+    world.human = new Human(0, 0, &world);
+    world.addOrganism(world.human);
 
-    Human* human = new Human(5, 0, &world);
-    world.addOrganism(human);
-
-    for (int i = 0; i < 15; ++i) world.addOrganism(new Sheep(rand() % WIDTH, rand() % HEIGHT, &world));
-    //for (int i = 0; i < 5; ++i) world.addOrganism(new Hogweed(rand() % WIDTH, rand() % HEIGHT, &world));
-    //for (int i = 0; i < 5; ++i) world.addOrganism(new Fox(rand() % WIDTH, rand() % HEIGHT, &world));
-    for (int i = 0; i < 5; ++i) world.addOrganism(new Turtle(rand() % WIDTH, rand() % HEIGHT, &world));
-    //for (int i = 0; i < 5; ++i) world.addOrganism(new Antelope(rand() % WIDTH, rand() % HEIGHT, &world));
-    //for (int i = 0; i < 5; ++i) world.addOrganism(new Belladonna(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Sheep(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Wolf(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Fox(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Turtle(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Antelope(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Grass(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new SowThistle(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Guarana(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Belladonna(rand() % WIDTH, rand() % HEIGHT, &world));
+    for (int i = 0; i < 2; ++i) world.addOrganism(new Hogweed(rand() % WIDTH, rand() % HEIGHT, &world));
 
     while (true) {
         world.drawWorld();
         char key = getch();
         if (key == 'q') break;
-        if (key == 'w') human->setDirection(0, -1); // UP
-        else if (key == 's') human->setDirection(0, 1); // DOWN
-        else if (key == 'a') human->setDirection(-1, 0); // LEFT
-        else if (key == 'd') human->setDirection(1, 0); // RIGHT
-        else if (key == 'p') human->activateAbility();
+        if (key == 'w') world.human->setDirection(0, -1); // UP
+        else if (key == 's') world.human->setDirection(0, 1); // DOWN
+        else if (key == 'a') world.human->setDirection(-1, 0); // LEFT
+        else if (key == 'd') world.human->setDirection(1, 0); // RIGHT
+        else if (key == 'p') world.human->activateAbility();
         world.makeTurn();
     }
 
