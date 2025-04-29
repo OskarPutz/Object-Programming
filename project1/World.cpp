@@ -128,6 +128,7 @@ void Animal::collision(Organism* other) {
                 Animal* thisAnimal = dynamic_cast<Animal*>(this);
                 if (thisAnimal) {
                     Animal* child = thisAnimal->clone(nx, ny);
+                    child->move = false;
                     if (child) {
                         world->queueOrganism(child);
                         world->lastCollisionMessage = draw() + std::string(" reproduced at (") + std::to_string(nx) + ", " + std::to_string(ny) + ")";
@@ -167,7 +168,7 @@ void Animal::collision(Organism* other) {
     if (other->draw() == 'T'){
         if (strength < 5) {
             move = false;
-            world->lastCollisionMessage = draw() + std::string(" was deflected by T at (") + std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
+            world->lastCollisionMessage = draw() + std::string(" was deflected by Turtle at (") + std::to_string(other->x) + ", " + std::to_string(other->y) + ")";
             return;
         }
     }
@@ -278,7 +279,7 @@ class Antelope : public Animal {
                             world->grid[y][x] = nullptr;
                             x = nx; y = ny;
                             world->grid[y][x] = this;
-                                    }
+                                }
                             break; 
                     }
                 }
@@ -293,7 +294,7 @@ class Grass : public Plant {
         
         char draw() override { return 'G'; }
         void action() override {
-            if (rand() % 20 == 0) { 
+            if (rand() % 10 == 0) { 
                 int nx = x + (rand() % 3 - 1); 
                 int ny = y + (rand() % 3 - 1);
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
@@ -310,7 +311,7 @@ class SowThistle : public Plant {
         char draw() override { return 's'; } 
         void action() override {
             for (int i = 0; i < 3; ++i) { 
-                if (rand() % 20 == 0) { 
+                if (rand() % 10 == 0) { 
                     int nx = x + (rand() % 3 - 1);
                     int ny = y + (rand() % 3 - 1);
                     if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
@@ -326,7 +327,7 @@ class Guarana : public Plant {
         Guarana(int x, int y, World* w) : Plant(0, x, y, w) {} 
         char draw() override { return 'g'; }
         void action() override {
-            if (rand() % 5 == 0) { 
+            if (rand() % 10 == 0) { 
                 int nx = x + (rand() % 3 - 1); 
                 int ny = y + (rand() % 3 - 1); 
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
@@ -342,7 +343,7 @@ class Belladonna : public Plant {
                     
         char draw() override { return 'b'; } 
         void action() override {
-            if (rand() % 20 == 0) { 
+            if (rand() % 10 == 0) { 
                 int nx = x + (rand() % 3 - 1); 
                 int ny = y + (rand() % 3 - 1); 
                 if (nx >= 0 && ny >= 0 && nx < WIDTH && ny < HEIGHT && world->grid[ny][nx] == nullptr) {
