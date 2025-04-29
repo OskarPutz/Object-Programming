@@ -400,7 +400,7 @@ void Human::activateAbility() {
         abilityDuration = 6; 
         abilityCooldown = 11; 
         world->lastCollisionMessage = "Ability activated!";
-        this->strength = 11;
+        strength += 6;
     } 
 }
 
@@ -462,11 +462,17 @@ int main() {
         world.drawWorld();
         char key = getch();
         if (key == 'q') break;
-        if (key == 'w') world.human->setDirection(0, -1); // UP
-        else if (key == 's') world.human->setDirection(0, 1); // DOWN
-        else if (key == 'a') world.human->setDirection(-1, 0); // LEFT
-        else if (key == 'd') world.human->setDirection(1, 0); // RIGHT
-        else if (key == 'p') world.human->activateAbility();
+        if (key == '\033') {
+            getch();
+            switch (getch()) {
+                case 'A': world.human->setDirection(0, -1); break; // UP
+                case 'B': world.human->setDirection(0, 1); break;  // DOWN
+                case 'C': world.human->setDirection(1, 0); break;  // RIGHT
+                case 'D': world.human->setDirection(-1, 0); break; // LEFT
+            }
+        } else if (key == 'p') {
+            world.human->activateAbility();
+        }
         world.makeTurn();
     }
 
