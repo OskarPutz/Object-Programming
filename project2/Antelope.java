@@ -1,9 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 class Antelope extends Animal {
-    private static final Random random = new Random();
     
     public Antelope(int x, int y, World w) {
         super(4, 4, x, y, w);

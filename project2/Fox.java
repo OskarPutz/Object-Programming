@@ -1,9 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 class Fox extends Animal {
-    private static final Random random = new Random();
     
     public Fox(int x, int y, World w) {
         super(3, 7, x, y, w);
