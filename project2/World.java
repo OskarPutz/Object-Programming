@@ -12,9 +12,12 @@ class World {
     Human human = null;
     
     public void addOrganism(Organism org) {
-        if (grid[org.y][org.x] == null) { // Only add if cell is empty
-            organisms.add(org);
-            grid[org.y][org.x] = org;
+        // Check bounds before adding
+        if (org.y >= 0 && org.y < HEIGHT && org.x >= 0 && org.x < WIDTH) {
+            if (grid[org.y][org.x] == null) { // Only add if cell is empty
+                organisms.add(org);
+                grid[org.y][org.x] = org;
+            }
         }
     }
     
@@ -33,9 +36,32 @@ class World {
         }
         
         organisms.removeIf(o -> !o.isAlive());
+        
+        // Update grid references for all organisms
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                grid[y][x] = null;
+            }
+        }
+        
+        for (Organism org : organisms) {
+            if (org.y >= 0 && org.y < HEIGHT && org.x >= 0 && org.x < WIDTH) {
+                grid[org.y][org.x] = org;
+            }
+        }
+        
         for (Organism org : newOrganisms) {
             addOrganism(org);
         }
         newOrganisms.clear();
+    }
+    
+    // Utility methods to get dimensions
+    public int getWidth() {
+        return WIDTH;
+    }
+    
+    public int getHeight() {
+        return HEIGHT;
     }
 }

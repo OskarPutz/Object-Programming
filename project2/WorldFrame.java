@@ -6,7 +6,7 @@ import java.util.*;
 class WorldFrame extends JFrame {
     private static final int WIDTH = 40;
     private static final int HEIGHT = 20;
-    private static final int CELL_SIZE = 25;
+    private static final int CELL_SIZE = 30;
     
     private World world;
     private WorldPanel worldPanel;
@@ -142,19 +142,20 @@ class WorldFrame extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            
+            int width2 = 40;
+            int height2 = 20;
             // Draw grid
             g.setColor(Color.LIGHT_GRAY);
-            for (int x = 0; x <= WIDTH; x++) {
-                g.drawLine(x * CELL_SIZE, 0, x * CELL_SIZE, HEIGHT * CELL_SIZE);
+            for (int x = 0; x <= width2; x++) {
+                g.drawLine(x * CELL_SIZE, 0, x * CELL_SIZE, height2 * CELL_SIZE);
             }
-            for (int y = 0; y <= HEIGHT; y++) {
-                g.drawLine(0, y * CELL_SIZE, WIDTH * CELL_SIZE, y * CELL_SIZE);
+            for (int y = 0; y <= height2; y++) {
+                g.drawLine(0, y * CELL_SIZE, width2 * CELL_SIZE, y * CELL_SIZE);
             }
             
             // Draw organisms
-            for (int y = 0; y < HEIGHT; y++) {
-                for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < height2; y++) {
+                for (int x = 0; x < width2; x++) {
                     if (world.grid[y][x] != null) {
                         char symbol = world.grid[y][x].draw();
                         g.setColor(COLORS.getOrDefault(symbol, Color.BLACK));
