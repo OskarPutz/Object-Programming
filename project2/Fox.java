@@ -1,8 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
-import java.io.Serializable;
 
-class Fox extends Animal implements Serializable {
+class Fox extends Animal {
     private static final long serialVersionUID = 1L;
     
     public Fox(int x, int y, World w) {

@@ -1,9 +1,8 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-import java.io.Serializable;
 
-abstract class Animal extends Organism implements Serializable {
+abstract class Animal extends Organism {
     private static final long serialVersionUID = 1L;
     private boolean move = true;
     private static final Random random = new Random();

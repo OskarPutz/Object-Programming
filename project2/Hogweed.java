@@ -1,6 +1,4 @@
-import java.io.Serializable;
-
-class Hogweed extends Plant implements Serializable {
+class Hogweed extends Plant {
     private static final long serialVersionUID = 1L;
     private static final int WIDTH = 40;
     private static final int HEIGHT = 20;

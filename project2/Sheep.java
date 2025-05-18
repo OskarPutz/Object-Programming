@@ -1,6 +1,4 @@
-import java.io.Serializable;
-
-class Sheep extends Animal implements Serializable {
+class Sheep extends Animal {
     private static final long serialVersionUID = 1L;
     public Sheep(int x, int y, World w) {
         super(4, 4, x, y, w);
