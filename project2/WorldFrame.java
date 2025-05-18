@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.io.*;
 
 class WorldFrame extends JFrame {
     private static final int WIDTH = 40;
@@ -29,7 +30,7 @@ class WorldFrame extends JFrame {
         JPanel statusPanel = new JPanel(new GridLayout(3, 1));
         statusLabel = new JLabel("No collisions yet.");
         humanStatusLabel = new JLabel("Ability status: OFF");
-        strengthLabel = new JLabel("Current strength: 5");
+        strengthLabel = new JLabel("Current strength: " + world.human.strength);
         statusPanel.add(humanStatusLabel);
         statusPanel.add(strengthLabel);
         statusPanel.add(statusLabel);
@@ -42,6 +43,8 @@ class WorldFrame extends JFrame {
         JButton rightButton = new JButton("Right");
         JButton abilityButton = new JButton("Activate Ability");
         JButton nextTurnButton = new JButton("Next Turn");
+        JButton saveButton = new JButton("Save");
+        JButton loadButton = new JButton("Load");
         
         upButton.addActionListener(e -> moveHuman(0, -1));
         downButton.addActionListener(e -> moveHuman(0, 1));
@@ -49,6 +52,8 @@ class WorldFrame extends JFrame {
         rightButton.addActionListener(e -> moveHuman(1, 0));
         abilityButton.addActionListener(e -> activateHumanAbility());
         nextTurnButton.addActionListener(e -> nextTurn());
+        saveButton.addActionListener(e -> saveWorld());
+        loadButton.addActionListener(e -> loadWorld());
         
         controlsPanel.add(upButton);
         controlsPanel.add(downButton);
@@ -56,6 +61,8 @@ class WorldFrame extends JFrame {
         controlsPanel.add(rightButton);
         controlsPanel.add(abilityButton);
         controlsPanel.add(nextTurnButton);
+        controlsPanel.add(saveButton);
+        controlsPanel.add(loadButton);
         add(controlsPanel, BorderLayout.NORTH);
         
         // Set up keyboard shortcuts
@@ -76,6 +83,46 @@ class WorldFrame extends JFrame {
         setSize(WIDTH * CELL_SIZE + 16, HEIGHT * CELL_SIZE + 150);
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+        private void saveWorld() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save World");
+        
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+                oos.writeObject(world);
+                statusLabel.setText("World saved successfully to " + file.getName());
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error saving world: " + e.getMessage(), 
+                    "Save Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
+        private void loadWorld() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Load World");
+        
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+                world = (World) ois.readObject();
+                statusLabel.setText("World loaded successfully from " + file.getName());
+                updateStatus();
+                worldPanel.repaint();
+            } catch (IOException | ClassNotFoundException e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error loading world: " + e.getMessage(), 
+                    "Load Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
     }
     
     private void moveHuman(int dx, int dy) {

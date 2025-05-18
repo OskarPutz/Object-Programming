@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.Serializable;
 
-class World {
+class World implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final int WIDTH = 40;
     private static final int HEIGHT = 20;
     

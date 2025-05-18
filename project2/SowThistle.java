@@ -1,6 +1,8 @@
 import java.util.Random;
+import java.io.Serializable;
 
-class SowThistle extends Plant {
+class SowThistle extends Plant implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final Random random = new Random();
     private static final int WIDTH = 40;
     private static final int HEIGHT = 20;

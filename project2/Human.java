@@ -1,4 +1,7 @@
-class Human extends Animal {
+import java.io.Serializable;
+
+class Human extends Animal implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int dx = 0, dy = 0;
     int abilityCooldown = 0;
     int abilityDuration = 0;
@@ -19,10 +22,10 @@ class Human extends Animal {
     
     public void activateAbility() {
         if (abilityCooldown == 0) {
-            abilityDuration = 6;
-            abilityCooldown = 11;
+            abilityDuration = 5;
+            abilityCooldown = 10;
             world.lastCollisionMessage = "Ability activated!";
-            strength += 6;
+            strength += 5;
         }
     }
     
@@ -46,7 +49,7 @@ class Human extends Animal {
         if (abilityCooldown > 0) abilityCooldown--;
         if (abilityDuration > 0) {
             abilityDuration--;
-            if (abilityDuration == 0) strength -= 6;
+            strength--;
         }
         
         age++;

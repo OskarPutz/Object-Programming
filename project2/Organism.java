@@ -1,4 +1,7 @@
-abstract class Organism {
+import java.io.Serializable;
+
+abstract class Organism implements Serializable {
+    private static final long serialVersionUID = 1L;
     int strength, initiative, age;
     int x, y;
     World world;

@@ -1,4 +1,7 @@
-class Wolf extends Animal {
+import java.io.Serializable;
+
+class Wolf extends Animal implements Serializable {
+    private static final long serialVersionUID = 1L;
     public Wolf(int x, int y, World w) {
         super(9, 5, x, y, w);
     }

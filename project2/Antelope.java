@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.Serializable;
 
-class Antelope extends Animal {
+class Antelope extends Animal implements Serializable {
+    private static final long serialVersionUID = 1L;
     
     public Antelope(int x, int y, World w) {
         super(4, 4, x, y, w);

@@ -1,8 +1,10 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.io.Serializable;
 
-abstract class Animal extends Organism {
+abstract class Animal extends Organism implements Serializable {
+    private static final long serialVersionUID = 1L;
     private boolean move = true;
     private static final Random random = new Random();
     private static final int WIDTH = 40;

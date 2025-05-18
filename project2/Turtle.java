@@ -1,6 +1,8 @@
 import java.util.Random;
+import java.io.Serializable;
 
-class Turtle extends Animal {
+class Turtle extends Animal implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final Random random = new Random();
     
     public Turtle(int x, int y, World w) {
