@@ -72,6 +72,7 @@ class WorldFrame extends JFrame {
         KeyStroke rightKey = KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0);
         KeyStroke pKey = KeyStroke.getKeyStroke(KeyEvent.VK_P, 0);
         KeyStroke spaceKey = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0);
+        KeyStroke qKey = KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0);
         
         getRootPane().registerKeyboardAction(e -> moveHuman(0, -1), upKey, JComponent.WHEN_IN_FOCUSED_WINDOW);
         getRootPane().registerKeyboardAction(e -> moveHuman(0, 1), downKey, JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -79,6 +80,7 @@ class WorldFrame extends JFrame {
         getRootPane().registerKeyboardAction(e -> moveHuman(1, 0), rightKey, JComponent.WHEN_IN_FOCUSED_WINDOW);
         getRootPane().registerKeyboardAction(e -> activateHumanAbility(), pKey, JComponent.WHEN_IN_FOCUSED_WINDOW);
         getRootPane().registerKeyboardAction(e -> nextTurn(), spaceKey, JComponent.WHEN_IN_FOCUSED_WINDOW);
+        getRootPane().registerKeyboardAction(e -> System.exit(0), qKey, JComponent.WHEN_IN_FOCUSED_WINDOW);
         
         setSize(WIDTH * CELL_SIZE + 16, HEIGHT * CELL_SIZE + 150);
         setLocationRelativeTo(null);
