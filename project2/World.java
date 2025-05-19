@@ -14,9 +14,9 @@ class World implements Serializable {
     Human human = null;
     
     public void addOrganism(Organism org) {
-        // Check bounds before adding
+
         if (org.y >= 0 && org.y < HEIGHT && org.x >= 0 && org.x < WIDTH) {
-            if (grid[org.y][org.x] == null) { // Only add if cell is empty
+            if (grid[org.y][org.x] == null) { 
                 organisms.add(org);
                 grid[org.y][org.x] = org;
             }
@@ -39,7 +39,6 @@ class World implements Serializable {
         
         organisms.removeIf(o -> !o.isAlive());
         
-        // Update grid references for all organisms
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 grid[y][x] = null;
