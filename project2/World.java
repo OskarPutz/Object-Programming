@@ -57,13 +57,4 @@ class World implements Serializable {
         }
         newOrganisms.clear();
     }
-    
-    // Utility methods to get dimensions
-    public int getWidth() {
-        return WIDTH;
-    }
-    
-    public int getHeight() {
-        return HEIGHT;
-    }
 }
