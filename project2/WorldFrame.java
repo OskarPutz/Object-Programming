@@ -65,7 +65,6 @@ class WorldFrame extends JFrame {
         controlsPanel.add(loadButton);
         add(controlsPanel, BorderLayout.NORTH);
         
-        // Set up keyboard shortcuts
         KeyStroke upKey = KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
         KeyStroke downKey = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
         KeyStroke leftKey = KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0);
@@ -86,7 +85,7 @@ class WorldFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
-        private void saveWorld() {
+    private void saveWorld() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Save World");
         
@@ -105,7 +104,7 @@ class WorldFrame extends JFrame {
             }
         }
     }
-        private void loadWorld() {
+    private void loadWorld() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Load World");
         
@@ -193,7 +192,7 @@ class WorldFrame extends JFrame {
             super.paintComponent(g);
             int width2 = 40;
             int height2 = 20;
-            // Draw grid
+            
             g.setColor(Color.LIGHT_GRAY);
             for (int x = 0; x <= width2; x++) {
                 g.drawLine(x * CELL_SIZE, 0, x * CELL_SIZE, height2 * CELL_SIZE);
@@ -202,7 +201,7 @@ class WorldFrame extends JFrame {
                 g.drawLine(0, y * CELL_SIZE, width2 * CELL_SIZE, y * CELL_SIZE);
             }
             
-            // Draw organisms
+            
             for (int y = 0; y < height2; y++) {
                 for (int x = 0; x < width2; x++) {
                     if (world.grid[y][x] != null) {

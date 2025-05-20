@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 class Fox extends Animal {
-    private static final long serialVersionUID = 1L;
     
     public Fox(int x, int y, World w) {
         super(3, 7, x, y, w);

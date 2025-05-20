@@ -3,7 +3,6 @@ import java.util.Collections;
 import java.util.Random;
 
 abstract class Animal extends Organism {
-    private static final long serialVersionUID = 1L;
     private boolean move = true;
     private static final Random random = new Random();
     private static final int WIDTH = 40;
@@ -40,6 +39,7 @@ abstract class Animal extends Organism {
     public void collision(Organism other) {
         if (other.getClass() == this.getClass()) {
             move = false;
+            ((Animal)other).move = false;
             int[][] dirs = {{0,1}, {1,0}, {0,-1}, {-1,0}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
             ArrayList<int[]> directions = new ArrayList<>();
             for (int[] dir : dirs) directions.add(dir);

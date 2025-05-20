@@ -1,6 +1,5 @@
 
 class Wolf extends Animal {
-    private static final long serialVersionUID = 1L;
     public Wolf(int x, int y, World w) {
         super(9, 5, x, y, w);
     }

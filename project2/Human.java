@@ -1,5 +1,4 @@
 class Human extends Animal {
-    private static final long serialVersionUID = 1L;
     private int dx = 0, dy = 0;
     int abilityCooldown = 0;
     int abilityDuration = 0;
