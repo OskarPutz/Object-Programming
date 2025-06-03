@@ -13,12 +13,11 @@ class Hogweed(Plant):
             nx, ny = self.x + dx, self.y + dy
             if 0 <= nx < self.WIDTH and 0 <= ny < self.HEIGHT:
                 organism = self.world.grid[ny][nx]
-                if organism is not None and isinstance(organism, Animal):
+                if organism is not None and isinstance(organism, Animal) and organism.draw() != 'C':
                     organism.alive = False
                     self.world.grid[ny][nx] = None
                     self.world.last_collision_message = f"Hogweed killed {organism.draw()} at ({nx}, {ny})"
         
-        # Call the parent method for reproduction
         super().action()
     
     def draw(self):

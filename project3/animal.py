@@ -60,10 +60,15 @@ class Animal(Organism):
             return
         
         # Deadly Hogweed case
-        if other.draw() == 'h':
+        if other.draw() == 'h' and self.draw() != 'C':
             self.world.last_collision_message = f"{self.draw()} was killed by Hogweed at ({other.x}, {other.y})"
             self.alive = False
             self.world.grid[self.y][self.x] = None
+            return
+        elif other.draw() == 'h' and self.draw() == 'C':
+            self.world.last_collision_message = f"{self.draw()} ate Hogweed at ({other.x}, {other.y})"
+            other.alive = False
+            self.world.grid[other.y][other.x] = None
             return
         
         # Antelope escape case

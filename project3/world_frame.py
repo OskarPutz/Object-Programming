@@ -14,6 +14,7 @@ from guarana import Guarana
 from belladonna import Belladonna
 from hogweed import Hogweed
 from human import Human
+from cybersheep import CyberSheep
 
 class WorldFrame(tk.Tk):
     WIDTH = 40
@@ -99,17 +100,18 @@ class WorldFrame(tk.Tk):
         self.world.add_organism(human)
         
         # Add animals
-        self.add_organisms(Wolf, 2)
-        self.add_organisms(Sheep, 4)
-        self.add_organisms(Fox, 2)
-        self.add_organisms(Turtler, 2)
-        self.add_organisms(Antelope, 2)
+        #self.add_organisms(Wolf, 2)
+        #self.add_organisms(Sheep, 4)
+        #self.add_organisms(Fox, 2)
+        #self.add_organisms(Turtler, 2)
+        #self.add_organisms(Antelope, 2)
+        self.add_organisms(CyberSheep, 2)
         
         # Add plants
-        self.add_organisms(Grass, 4)
-        self.add_organisms(SowThistle, 2)
-        self.add_organisms(Guarana, 2)
-        self.add_organisms(Belladonna, 2)
+        #self.add_organisms(Grass, 4)
+        #self.add_organisms(SowThistle, 2)
+       # self.add_organisms(Guarana, 2)
+       # self.add_organisms(Belladonna, 2)
         self.add_organisms(Hogweed, 1)
     
     def add_organisms(self, organism_class, count):
@@ -140,6 +142,7 @@ class WorldFrame(tk.Tk):
             'H': "blue",     # Human
             'W': "gray",     # Wolf
             'S': "white",    # Sheep
+            'C': "cyan",     # CyberSheep
             'F': "orange",   # Fox
             'T': "green",    # Turtle
             'A': "brown",    # Antelope
