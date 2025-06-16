@@ -80,21 +80,8 @@ class CyberSheep(Animal):
             
             # Check if the target cell has an organism
             if self.world.grid[ny][nx] is not None:
-                if self.world.grid[ny][nx].draw() == 'h':
-                    # Special handling for hogweed - CyberSheep eats it without dying
-                    hogweed = self.world.grid[ny][nx]
-                    self.world.last_collision_message = f"{self.draw()} ate Hogweed at ({hogweed.x}, {hogweed.y})"
-                    hogweed.alive = False
-                    self.world.grid[ny][nx] = None
-                    
-                    # Move to the hogweed's position
-                    self.world.grid[self.y][self.x] = None
-                    self.x, self.y = nx, ny
-                    self.world.grid[self.y][self.x] = self
-                else:
-                    self.collision(self.world.grid[ny][nx])
+                self.collision(self.world.grid[ny][nx])
             
-            # Move if still alive and allowed to move (and didn't already move to eat hogweed)
             elif self.alive and self.move:
                 self.world.grid[self.y][self.x] = None
                 self.x, self.y = nx, ny
